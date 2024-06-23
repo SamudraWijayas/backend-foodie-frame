@@ -2,9 +2,9 @@ import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import Users from '../model/UsersModel.js';
 
-const SECRET_KEY = process.env.SECRET_KEY; // Menggunakan secret key dari .env
+const SECRET_KEY = process.env.ACCESS_TOKEN_SECRET; // Menggunakan secret key dari .env
 
-export const Login = async (req, res) => {
+export const login = async (req, res) => {
   const { email, password } = req.body;
 
   // Validate input
@@ -38,13 +38,13 @@ export const Login = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-  req.session.destroy((err) => {
-    if (err) return res.status(400).json({ msg: 'Tidak dapat logout', error: err.message });
-    res.status(200).json({ msg: 'Anda telah logout' });
-  });
+  // Secara umum, JWT tidak memerlukan logout karena token yang diterbitkan memiliki masa berlaku (expiration time).
+  // Pengguna dapat "logout" dengan cara menghapus token dari client-side (misalnya, dengan menghapus dari localStorage).
+
+  res.status(200).json({ msg: 'Anda telah logout' });
 };
 
-export const Register = async (req, res) => {
+export const register = async (req, res) => {
   const { name, email, password, confPassword } = req.body;
 
   if (password !== confPassword) {
