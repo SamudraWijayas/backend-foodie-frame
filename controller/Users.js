@@ -1,6 +1,5 @@
 import Users from "../model/UsersModel.js";
-import bcrypt from "bcryptjs"; // Menggunakan bcrypt sebagai alternatif untuk hashing password
-
+import argon2 from "argon2";
 import fs from "fs"; // Import module fs untuk manipulasi file
 import jwt from "jsonwebtoken";
 
@@ -34,7 +33,7 @@ export const createUsers = async (req, res) => {
   const { name, email, password, confPassword, role } = req.body;
   if (password !== confPassword)
     return res.status(400).json({ msg: "Password tidak cocok" });
-  const hashPassword = await bcrypt.hash(password);
+  const hashPassword = await argon2.hash(password);
   try {
     await Users.create(name, email, hashPassword, role);
     res.status(201).json({ msg: "Register berhasil" });
@@ -53,7 +52,7 @@ export const updateUser = async (req, res) => {
   } else {
     if (password !== confPassword)
       return res.status(400).json({ msg: "Password tidak cocok" });
-    hashPassword = await bcrypt.hash(password);
+    hashPassword = await argon2.hash(password);
   }
 
   const avatar = req.file ? `/uploads/profil/${req.file.filename}` : null;
