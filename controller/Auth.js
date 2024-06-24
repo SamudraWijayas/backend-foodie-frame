@@ -69,7 +69,7 @@ export const Register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(password, salt);
     const role = "user"; // Set role default sebagai user
-    const avatar = "tidak ada poto"
+    const avatar = ""
     await Users.create(name, email, hashPassword, role, avatar);
     res.status(201).json({ msg: "Registrasi berhasil" });
   } catch (error) {
