@@ -31,12 +31,14 @@ export const getUsersById = async (req, res) => {
 
 export const createUsers = async (req, res) => {
   const { name, email, password, confPassword, role } = req.body;
-  if (password !== confPassword)
+  if (password !== confPassword) {
     return res.status(400).json({ msg: "Password tidak cocok" });
-  const hashPassword = await bcrypt.hash(password);
+  }
   try {
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(password, salt);
     await Users.create(name, email, hashPassword, role);
-    res.status(201).json({ msg: "Register berhasil" });
+    res.status(201).json({ msg: "Registrasi berhasil" });
   } catch (error) {
     res.status(400).json({ msg: error.message });
   }
@@ -50,22 +52,26 @@ export const updateUser = async (req, res) => {
     const user = await Users.findOne({ where: { id } });
     hashPassword = user.password;
   } else {
-    if (password !== confPassword)
+    if (password !== confPassword) {
       return res.status(400).json({ msg: "Password tidak cocok" });
-    hashPassword = await bcrypt.hash(password);
+    }
+    const salt = await bcrypt.genSalt(10);
+    hashPassword = await bcrypt.hash(password, salt);
   }
 
   const avatar = req.file ? `/uploads/profil/${req.file.filename}` : null;
 
   try {
     const user = await Users.findOne(id);
-    if (!user) return res.status(404).json({ msg: "User tidak ditemukan" });
+    if (!user) {
+      return res.status(404).json({ msg: "User tidak ditemukan" });
+    }
 
     if (avatar && user.avatar) {
       try {
         fs.unlinkSync(`.${user.avatar}`);
       } catch (err) {
-        console.error("Failed to delete old avatar:", err);
+        console.error("Gagal menghapus avatar lama:", err);
       }
     }
 
@@ -91,7 +97,7 @@ export const updateUser = async (req, res) => {
       try {
         fs.unlinkSync(`.${avatar}`);
       } catch (err) {
-        console.error("Failed to delete uploaded avatar:", err);
+        console.error("Gagal menghapus avatar yang diupload:", err);
       }
     }
     res.status(400).json({ msg: error.message });
@@ -102,14 +108,16 @@ export const deleteUser = async (req, res) => {
   const id = req.params.id;
   try {
     const user = await Users.findOne(id);
-    if (!user) return res.status(404).json({ msg: "User tidak ditemukan" });
+    if (!user) {
+      return res.status(404).json({ msg: "User tidak ditemukan" });
+    }
 
     // Hapus avatar terkait sebelum menghapus user
     if (user.avatar) {
       try {
         fs.unlinkSync(`.${user.avatar}`);
       } catch (err) {
-        console.error("Failed to delete avatar:", err);
+        console.error("Gagal menghapus avatar:", err);
       }
     }
 
