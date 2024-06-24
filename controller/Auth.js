@@ -1,8 +1,10 @@
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import Users from "../model/UsersModel.js";
+import dotenv from "dotenv";
+dotenv.config();
 
-const SECRET_KEY = process.env.ACCESS_TOKEN_SECRET; // Menggunakan secret key dari .env
+const SECRET_KEY = process.env.SECRET_KEY; // Menggunakan secret key dari .env
 
 export const Login = async (req, res) => {
   const { email, password } = req.body;
