@@ -1,7 +1,7 @@
+import Users from '../model/UsersModel.js';
+import bcrypt from 'bcryptjs';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
-import Users from '../model/UsersModel.js';
-import bcrypt from 'bcryptjs'; // Menggunakan bcrypt sebagai alternatif untuk hashing password
 
 export const getUsers = async (req, res) => {
   try {
@@ -11,6 +11,7 @@ export const getUsers = async (req, res) => {
     res.status(500).json({ msg: error.message });
   }
 };
+
 export const getUsers1 = async (req, res) => {
   try {
     const response = await Users.findAll();

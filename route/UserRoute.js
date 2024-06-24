@@ -16,6 +16,5 @@ router.get("/users/:id", verifyUser, adminOnly, getUsersById); // GET user by ID
 router.post("/users", verifyUser, adminOnly, createUsers); // POST create new user
 router.put("/users/:id", upload.single("avatar"), verifyUser, updateUser); // PUT update user by ID
 router.delete("/users/:id", verifyUser, adminOnly, deleteUser); // DELETE user by ID
-// router.post('/login', login);
 
 export default router;
