@@ -31,14 +31,21 @@ export const getUsersById = async (req, res) => {
 
 export const createUsers = async (req, res) => {
   const { name, email, password, confPassword, role } = req.body;
+
   if (password !== confPassword) {
     return res.status(400).json({ msg: "Password tidak cocok" });
   }
+
   try {
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(password, salt);
-    await Users.create(name, email, hashPassword, role);
-    res.status(201).json({ msg: "Registrasi berhasil" });
+
+    // Set avatar to empty string ("") or null
+    const avatar = ""; // or null
+
+    await Users.create(name, email, hashPassword, role, avatar);
+
+    res.status(201).json({ msg: "Tambah berhasil" });
   } catch (error) {
     res.status(400).json({ msg: error.message });
   }
