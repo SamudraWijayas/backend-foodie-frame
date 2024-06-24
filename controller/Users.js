@@ -1,17 +1,9 @@
-import Users from "../model/UsersModel.js";
-import argon2 from "argon2";
-import fs from "fs"; // Import module fs untuk manipulasi file
+import fs from "fs";
 import jwt from "jsonwebtoken";
+import Users from "../model/UsersModel.js";
+import bcrypt from "bcryptjs"; // Menggunakan bcrypt sebagai alternatif untuk hashing password
 
 export const getUsers = async (req, res) => {
-  try {
-    const response = await Users.findAll();
-    res.status(200).json(response);
-  } catch (error) {
-    res.status(500).json({ msg: error.message });
-  }
-};
-export const getUsers1 = async (req, res) => {
   try {
     const response = await Users.findAll();
     res.status(200).json(response);
@@ -31,12 +23,14 @@ export const getUsersById = async (req, res) => {
 
 export const createUsers = async (req, res) => {
   const { name, email, password, confPassword, role } = req.body;
-  if (password !== confPassword)
+  if (password !== confPassword) {
     return res.status(400).json({ msg: "Password tidak cocok" });
-  const hashPassword = await argon2.hash(password);
+  }
   try {
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(password, salt);
     await Users.create(name, email, hashPassword, role);
-    res.status(201).json({ msg: "Register berhasil" });
+    res.status(201).json({ msg: "Registrasi berhasil" });
   } catch (error) {
     res.status(400).json({ msg: error.message });
   }
@@ -50,22 +44,26 @@ export const updateUser = async (req, res) => {
     const user = await Users.findOne({ where: { id } });
     hashPassword = user.password;
   } else {
-    if (password !== confPassword)
+    if (password !== confPassword) {
       return res.status(400).json({ msg: "Password tidak cocok" });
-    hashPassword = await argon2.hash(password);
+    }
+    const salt = await bcrypt.genSalt(10);
+    hashPassword = await bcrypt.hash(password, salt);
   }
 
   const avatar = req.file ? `/uploads/profil/${req.file.filename}` : null;
 
   try {
     const user = await Users.findOne(id);
-    if (!user) return res.status(404).json({ msg: "User tidak ditemukan" });
+    if (!user) {
+      return res.status(404).json({ msg: "User tidak ditemukan" });
+    }
 
     if (avatar && user.avatar) {
       try {
         fs.unlinkSync(`.${user.avatar}`);
       } catch (err) {
-        console.error("Failed to delete old avatar:", err);
+        console.error("Gagal menghapus avatar lama:", err);
       }
     }
 
@@ -91,7 +89,7 @@ export const updateUser = async (req, res) => {
       try {
         fs.unlinkSync(`.${avatar}`);
       } catch (err) {
-        console.error("Failed to delete uploaded avatar:", err);
+        console.error("Gagal menghapus avatar yang diupload:", err);
       }
     }
     res.status(400).json({ msg: error.message });
@@ -102,14 +100,16 @@ export const deleteUser = async (req, res) => {
   const id = req.params.id;
   try {
     const user = await Users.findOne(id);
-    if (!user) return res.status(404).json({ msg: "User tidak ditemukan" });
+    if (!user) {
+      return res.status(404).json({ msg: "User tidak ditemukan" });
+    }
 
     // Hapus avatar terkait sebelum menghapus user
     if (user.avatar) {
       try {
         fs.unlinkSync(`.${user.avatar}`);
       } catch (err) {
-        console.error("Failed to delete avatar:", err);
+        console.error("Gagal menghapus avatar:", err);
       }
     }
 

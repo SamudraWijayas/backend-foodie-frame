@@ -1,11 +1,11 @@
-import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import Users from "../model/UsersModel.js";
 import dotenv from "dotenv";
+import bcrypt from "bcryptjs"; // Menggunakan bcrypt sebagai alternatif untuk hashing password
 
 dotenv.config();
 
-const SECRET_KEY = process.env.SECRET_KEY;
+const { SECRET_KEY } = process.env;
 
 export const Login = async (req, res) => {
   const { email, password } = req.body;
@@ -21,7 +21,7 @@ export const Login = async (req, res) => {
       return res.status(404).json({ msg: "User tidak ditemukan" });
     }
 
-    const match = await argon2.verify(user.password, password);
+    const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return res.status(400).json({ msg: "Password salah" });
     }
@@ -66,7 +66,8 @@ export const Register = async (req, res) => {
       return res.status(400).json({ msg: "Email sudah digunakan" });
     }
 
-    const hashPassword = await argon2.hash(password);
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(password, salt);
     const role = "user"; // Set role default sebagai user
     await Users.create(name, email, hashPassword, role);
     res.status(201).json({ msg: "Registrasi berhasil" });
